@@ -1,0 +1,30 @@
+title: Suspicious Process Spawning from Explorer via Run Dialog (ClickFix Mitigation)
+id: 5f3b7c2a-9e12-4c63-b8d4-59cb68b5a031
+status: experimental
+description: Detects when native Windows desktop processes shell out to command line interfaces with explicit flags, characteristic of ClickFix social engineering patterns.
+author: Your Name
+date: 2026/09/15
+tags:
+    - attack.initial_access
+    - attack.execution
+    - attack.t1204.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_parent:
+        ParentProcessName|endswith: '\explorer.exe'
+    selection_image:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\cmd.exe'
+            - '\wscript.exe'
+    selection_flags:
+        CommandLine|contains:
+            - 'ClickFix'
+            - '-NoExit'
+            - 'Write-Host'
+    condition: selection_parent and selection_image and selection_flags
+falsepositives:
+    - Administrative maintenance scripts manually initiated via Run box.
+level: high
